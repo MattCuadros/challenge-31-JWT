@@ -19,6 +19,12 @@ export const handleErrors = (code) => {
         message: "No existe ese registro",
       };
     }
+    case "501": {
+      return {
+        status: 501,
+        message: "No existe el header de autenticacion",
+      };
+    }
     default:
       return {
         status: 500,
