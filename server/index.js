@@ -3,9 +3,9 @@ import * as dotenv from "dotenv";
 dotenv.config();
 import express from "express";
 import cors from "cors";
-import format from "pg-format";
 import { pool } from "./db/query.js";
 import morgan from "morgan";
+import { handleErrors } from "./db/handleErrors.js";
 
 const app = express();
 app.use(express.json());
@@ -32,12 +32,17 @@ app.post("/usuarios", async (req, res) => {
     } else {
       const text =
         "INSERT INTO usuarios (email, password, role, language) VALUES ( $1, $2, $3, $4 ) RETURNING *";
-      const values = [email, password, role, language];
 
-      const { rows } = await pool.query(text, [values]);
-      return rows;
+      const { rows } = await pool.query(text, [email, password, role, language]);
+      return res.status(201).json({
+        ok:true,
+        data:rows[0],
+        msg:"Usuario registrado satisfactoriamente"
+      });
     }
   } catch (error) {
     console.log(error);
+    const { status, message } = handleErrors(error.code);
+    return res.status(status).json({ ok: false, message });
   }
 });
